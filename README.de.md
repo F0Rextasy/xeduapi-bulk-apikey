@@ -11,7 +11,7 @@
 
 # xeduapi-bulk-apikey
 
-**Massenhaft 聚合api服务-Konten mit API-Schlüsseln erstellen — OpenAI-kompatible Inferenz + 9Router-Connector.**
+**Massenhaftes Erstellen von 聚合api服务-Konten mit API-Schlüsseln — OpenAI-kompatible Inferenz + 9Router-Connector.**
 
 [![Node](https://img.shields.io/badge/Node-%E2%89%A518-3DA639?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-blue?style=for-the-badge)](#)
@@ -36,7 +36,7 @@
 
 聚合api服务 (xeduapi.com) ist ein New-API-Fork (`v1.0.0-rc.45`) mit dem freundlichsten Zugang der Familie: Die Registrierung ist **offen**, es gibt **kein Captcha**, und ein frisches Konto wird **bei der Erstellung aufgeladen** — `quota = 100000` (das sind **$0.20** bei 500 000 Quota pro Dollar). Keine Karte, kein Telefon, kein OAuth, kein tägliches Ritual: eine Bestätigungsmail und ein Formular-POST, und der Schlüssel kann sofort erzeugt und nachgewiesen werden.
 
-Was das Tool richtig hinbekommen muss, ist die Adressrichtlinie und die Kanalaufteilung. Die Mail-Whitelist akzeptiert **gmail.com** und **qq.com**, lehnt aber `outlook.com` ab, und — wie seine Schwester-Panels — behandelt es einen **Punkt oder ein `+`** im lokalen Teil als „Sonderzeichen", sodass Plus-/Punkt-Aliase hier tot sind und die funktionierende Schiene ein **einfaches** `@gmail.com`-Postfach ist, das direkt gelesen wird. Auf der Modellseite ist der Katalog gemischt: `deepseek-chat`, `deepseek-v3` und Verwandte antworten auf `/v1/chat/completions`, während der **Codex-Kanal** (`gpt-5.6-terra` und seine Geschwister) diesen Endpunkt mit HTTP 500 und einer Meldung ablehnt, die besagt, dass du die **Responses API** verwenden sollst — das Gate überspringt diese IDs, damit ein gesunder Schlüssel nie für eine Kanal-Fehlpaarung verantwortlich gemacht wird.
+Was das Tool richtig hinbekommen muss, ist die Adressrichtlinie und die Kanalaufteilung. Die Mail-Whitelist akzeptiert **gmail.com** und **qq.com**, lehnt aber `outlook.com` ab, und — wie seine Schwester-Panels — behandelt es einen **Punkt oder ein `+`** im lokalen Teil als „Sonderzeichen“, sodass Plus-/Punkt-Aliase hier tot sind und die funktionierende Schiene ein **einfaches** `@gmail.com`-Postfach ist, das direkt gelesen wird. Auf der Modellseite ist der Katalog gemischt: `deepseek-chat`, `deepseek-v3` und Verwandte antworten auf `/v1/chat/completions`, während der **Codex-Kanal** (`gpt-5.6-terra` und seine Geschwister) diesen Endpunkt mit HTTP 500 und einer Meldung ablehnt, die besagt, dass die **Responses API** verwendet werden soll — das Gate überspringt diese IDs, damit ein gesunder Schlüssel nie für eine Kanal-Fehlpaarung verantwortlich gemacht wird.
 
 ## 🎁 Kostenlose Stufe — wie viel du bekommst
 
@@ -48,39 +48,37 @@ Was das Tool richtig hinbekommen muss, ist die Adressrichtlinie und die Kanalauf
 | Was es kauft | 10 Modelle über DeepSeek / StepFun / Z.ai / xAI, zu den veröffentlichten Tarifen des Panels; es gibt keine strikte $0-Zeile |
 | Schlüssel pro Konto | ein Schlüssel pro Konto ist die natürliche Form — das Guthaben liegt auf dem Konto |
 
-Da es keine tägliche Auffrischung gibt, ist die Einheit, die skaliert, **Konten**: N Konten ⇒ N × $0.20 Guthaben.
+Da es keine tägliche Erneuerung gibt, ist die Einheit, die skaliert, **Konten**: N Konten ⇒ N × $0.20 Guthaben.
 
-> 💡 Die kostenlose Stufe wird von 聚合api服务 festgelegt und kann sich ändern. Prüfe die Live-Zahlen auf [xeduapi.com](https://xeduapi.com) — und lass das Gate des Tools selbst entscheiden:
+> 💡 Die kostenlose Stufe wird von 聚合api服务 festgelegt und kann sich ändern. Prüfe die aktuellen Zahlen auf [xeduapi.com](https://xeduapi.com) — und lass das Gate des Tools selbst entscheiden:
 
 ```bash
-```bash
-# jeder Schlüssel in keys.txt: die Modellliste plus eine echte Completion
+# every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 
-# von Hand (Schlüssel tragen kein `sk-`-Präfix)
+# by hand (keys carry no `sk-` prefix)
 curl https://xeduapi.com/v1/chat/completions \
   -H "Authorization: Bearer YOUR_KEY" -H "Content-Type: application/json" \
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"gday"}],"max_tokens":64}'
 ```
 
-Das Gate zählt `content || reasoning_content`. Bevorzuge für die Prüfung eine Chat-Kanal-ID: `deepseek-chat` und `deepseek-v3` sind die beiden hier nachgewiesenen.
-```
+Das Gate zählt `content || reasoning_content` und geht eine kurze Kandidatenliste über wechselnde Exits durch: `deepseek-chat`, `deepseek-v3` und `z-ai/glm-5.3` sind das, was der 12-Schlüssel-Lauf bewiesen hat (Codex-Kanal-IDs antworten mit 500 und werden übersprungen).
 
 ## 🤖 Modelle — alle 10 davon
 
-`GET /v1/models` mit einem Live-Schlüssel (2026-10-21) — **10 IDs**:
+`GET /v1/models` auf einem Live-Schlüssel (2026-10-21) — **10 IDs**:
 
 | ID | Kanal |
 | --- | --- |
-| `deepseek-chat` · `deepseek-v3` · `deepseek-ai/deepseek-v4.1-flash` | **Chat Completions** — als beantwortbar nachgewiesen |
+| `deepseek-chat` · `deepseek-v3` · `deepseek-ai/deepseek-v4.1-flash` | **Chat Completions** — als beantwortbar bewiesen |
 | `stepfun-ai/step-5-preview` · `z-ai/glm-5.3` · `z-ai/glm-5.3-flash` · `grok-4.5` · `grok-4.6` · `grok-4.7` | Chat Completions (hier nicht einzeln getestet) |
-| `gpt-5.6-terra` | **nur Responses API** — `/v1/chat/completions` antwortet mit **500** und *„当前codex渠道模型(gpt-5.6-terra等)支持的格式：OpenAI Responses (/responses)，不支持的格式：OpenAI (/v1/chat/completions)"* |
+| `gpt-5.6-terra` | **nur Responses API** — `/v1/chat/completions` antwortet **500** mit *„当前codex渠道模型(gpt-5.6-terra等)支持的格式：OpenAI Responses (/responses)，不支持的格式：OpenAI (/v1/chat/completions)“* |
 
-Eine Chat-Kanal-ID ist also das richtige Modell für einen Health-Check. `/api/pricing` listet 5 Zeilen, nur Gruppe `default`, **keine strikte $0-Zeile** — die kostenlose Stufe ist das Anmeldeguthaben, kein kostenloses Modell.
+Eine Chat-Kanal-ID ist also das richtige Modell für eine Gesundheitsprüfung. `/api/pricing` listet 5 Zeilen, nur Gruppe `default`, **keine strikte $0-Zeile** — die kostenlose Stufe ist das Anmeldeguthaben, kein kostenloses Modell.
 
-## 🧪 Die API verwenden
+## 🧪 So verwendest du die API
 
-Basis-URL **`https://xeduapi.com/v1`** — OpenAI-kompatibel; Schlüssel sind 48 Zeichen mit **keinem `sk-`-Präfix** und reisen in einem `Authorization: Bearer`-Header.
+Basis-URL **`https://xeduapi.com/v1`** — OpenAI-kompatibel; Schlüssel sind 48 Zeichen mit **keinem `sk-`-Präfix** und werden über einen `Authorization: Bearer`-Header übertragen.
 
 ```python
 from openai import OpenAI
@@ -89,7 +87,7 @@ print(c.chat.completions.create(model="deepseek-chat",
       messages=[{"role":"user","content":"gday"}]).choices[0].message.content)
 ```
 
-Die Modelle des Codex-Kanals benötigen die Responses API; das Panel lehnt `/v1/responses` mit einem bloßen Input-Body ab (404), daher ist die Verdrahtung dieses Kanals eine separate Übung — alles andere ist reines OpenAI.
+Die Codex-Kanal-Modelle benötigen die Responses API; das Panel lehnt `/v1/responses` mit einem bloßen Input-Body ab (404), daher ist die Anbindung dieses Kanals eine separate Übung — alles andere ist reines OpenAI.
 
 Das Kontingent gilt pro Konto und wird von dessen Schlüsseln geteilt, daher hält **ein Konto = ein Schlüssel** die Abrechnung sauber (`usd_exchange_rate: 6.8` ist ein Anzeigekurs; das Guthaben selbst ist in USD denominiert).
 
@@ -97,18 +95,18 @@ Das Kontingent gilt pro Konto und wird von dessen Schlüsseln geteilt, daher hä
 
 ```bash
 cd xeduapi-bulk-apikey
-printf 'socks5://host:port\n' > proxies.txt   # optional — ohne sie läuft das Tool direkt
-node src/cli.js --screen                     # die Exits gegen das Panel prüfen
-node src/cli.js --count 5                    # fünf aufgeladene Schlüssel (kein Browser nötig)
-node src/cli.js --verify-only                # jeden Schlüssel erneut nachweisen
-node src/cli.js --connect-9router            # sie bei einem lokalen 9Router registrieren
+printf 'socks5://host:port\n' > proxies.txt   # optional — without it the tool runs direct
+node src/cli.js --screen                     # vet the exits against the panel
+node src/cli.js --count 5                    # five funded keys (no browser needed)
+node src/cli.js --verify-only                # re-prove every key
+node src/cli.js --connect-9router            # register them with a local 9Router
 ```
 
-Das Tool erstellt ein einfaches Gmail-Postfach, fordert den Code an, wartet darauf, registriert sich mit demselben Cookie-Jar, meldet sich an, erzeugt ein Token, gibt den Schlüssel preis und weist ihn mit einer echten Completion nach, bevor es ihn aufschreibt.
+Das Tool erstellt ein einfaches Gmail-Postfach, fordert den Code an, wartet darauf, registriert sich mit demselben Cookie-Jar, meldet sich an, erzeugt ein Token, zeigt den Schlüssel an und beweist ihn mit einer echten Completion, bevor es ihn aufschreibt.
 
 ### 🖱️ Der Launcher
 
-Der Launcher fragt nach der Proxy-Liste (optional — ohne eine läuft die CLI direkt) und der Kontenanzahl, merkt sich beides und führt die CLI aus — plus `--verify-only`, `--screen` und den 9Router-Connector.
+Der Launcher fragt nach der Proxy-Liste (optional — ohne eine läuft die CLI direkt) und der Kontoanzahl, merkt sich beides und führt die CLI aus — plus `--verify-only`, `--screen` und den 9Router-Connector.
 
 ## ✅ Verifiziert funktionierend — jeder Schlüssel wird getestet
 
@@ -117,14 +115,14 @@ Jede Prüfung unten lief am **2026-10-21** über die eigene CLI dieses Pakets (`
 | Prüfung | Ergebnis |
 | --- | --- |
 | Registrierung | **kein Browser nötig** — `turnstile_check: false` |
-| Mail-Whitelist | **gmail.com ✓** · qq.com ✓ · `outlook.com` ✗; ein Punkt oder `+` im lokalen Teil wird als „Sonderzeichen" abgelehnt |
+| Mail-Whitelist | **gmail.com ✓** · qq.com ✓ · `outlook.com` ✗; ein Punkt oder `+` im lokalen Teil wird als „Sonderzeichen“ abgelehnt |
 | Code-Mail | «聚合api服务 email verification» vom eigenen Relay des Panels, **1–2 s**, 6-stelliger Code, gültig **10 Minuten** |
 | Registrieren | **200 `{"success":true}`** mit demselben Cookie-Jar + einem frischen Code + einem Passwort mit ≥8 Zeichen |
-| Kostenlose Stufe | `GET /api/user/self` → **`quota = 100000` = $0.20** bei einem frischen Konto; `POST /api/user/checkin` → `Check-in feature is not enabled` |
-| Schlüsselroute | die Liste zeigt ihn maskiert; `POST /api/token/<id>/key` liefert den 48-stelligen Klartext (Gruppe `default`) |
+| Kostenlose Stufe | `GET /api/user/self` → **`quota = 100000` = $0.20** auf einem frischen Konto; `POST /api/user/checkin` → `Check-in feature is not enabled` |
+| Schlüsselroute | Die Liste zeigt ihn maskiert; `POST /api/token/<id>/key` liefert den 48-stelligen Klartext (Gruppe `default`) |
 | `GET /v1/models` pro Schlüssel | **200**, 10 IDs |
-| `POST /v1/chat/completions` pro Schlüssel | **200** mit Inhalt (`deepseek-chat`, `deepseek-v3`) — **2/2 Schlüssel LIVE** |
-| Codex-Kanal | `gpt-5.6-terra` → **500** bei Chat Completions, wörtlich: benötigt stattdessen **OpenAI Responses (/responses)** |
+| `POST /v1/chat/completions` pro Schlüssel | **200** mit Inhalt (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **12/12 Schlüssel LIVE**; Massen-Erstellung 2026-10-21: **2 → 12 Schlüssel**, das Gate geht eine Kandidatenliste über wechselnde Exits durch |
+| Codex-Kanal | `gpt-5.6-terra` → **500** bei Chat Completions, wörtlich: benötigt stattdessen die **OpenAI Responses (/responses)** |
 | End-to-End-Geschwindigkeit | **~45–70 s pro Schlüssel** (Mail → Registrierung → Schlüssel → Nachweis) |
 
 ## 🧭 So funktioniert es
@@ -144,7 +142,7 @@ inbox (one address per account)                                  a fresh address
 | Code | `GET /api/verification?email=` | kommt in **1–2 s** von `noreply@<panel-mail>`, Betreff «聚合api服务 email verification», 6-stelliger Code, gültig 10 Minuten |
 | Registrieren | `POST /api/user/register` | Body `{username,password,password2,email,verification_code,aff_code}`; **derselbe Cookie-Jar**, **frischer** Code, Passwort ≥8 |
 | Sitzung | `POST /api/user/login` | `data.access_token` (Bearer JWT) |
-| Guthaben | `GET /api/user/self` | **`quota = 100000` = $0.20** bei einem frischen Konto |
+| Guthaben | `GET /api/user/self` | **`quota = 100000` = $0.20** auf einem frischen Konto |
 | Schlüssel | `POST /api/token/` → `POST /api/token/<id>/key` | Gruppe `default` (der Live-Name dieses Panels); die Liste zeigt den Schlüssel maskiert und `/key` liefert den Klartext |
 | Nachweis | `GET /v1/models` + `POST /v1/chat/completions` | `content || reasoning_content`; Codex-Kanal-IDs werden übersprungen (sie benötigen `/v1/responses`) |
 
@@ -162,7 +160,7 @@ node src/cli.js --connect-9router --base http://localhost:20128 --password 12345
 
 | Flag | Standard | Bedeutung |
 | --- | --- | --- |
-| `--count N` | `1` | zu erstellende Konten |
+| `--count N` | `1` | Anzahl der zu erstellenden Konten |
 | `--pool FILE` | `proxies.txt`, falls vorhanden | Exits, eine pro Zeile (`http://`, `socks5://`, `socks4://`) |
 | `--proxy URL` | — | einen einzelnen Exit festlegen |
 | `--exits K` | `6` | pro Konto versuchte Exit-Kandidaten |
@@ -175,16 +173,16 @@ node src/cli.js --connect-9router --base http://localhost:20128 --password 12345
 
 **Optional.** Ohne einen Pool gibt das Tool `DIRECT (no proxy)` aus und spricht direkt von dieser Maschine mit dem Panel; mit einem wird jede Panel-Anfrage an einen Exit gebunden und ein toter Exit kostet nur seinen eigenen Versuch.
 
-Das Postfach wird absichtlich **direkt** gelesen — das Mail-Gate ist vom API-Host getrennt, und Emailnator über einen TLS-abfangenden Exit zu proxien antwortet mit `unable to get local issuer certificate`. Der Reader erzwingt IPv4, weil dieser Build zuerst auf IPv6 auflöst, ohne Route.
+Das Postfach wird absichtlich **direkt** gelesen — das Mail-Gate ist vom API-Host getrennt, und Emailnator über einen TLS-unterbrechenden Exit zu proxien antwortet mit `unable to get local issuer certificate`. Der Reader erzwingt IPv4, weil dieser Build zuerst zu IPv6 auflöst, ohne Route.
 
 ## 📄 Dateien
 
 | Pfad | Inhalt |
 | --- | --- |
-| `keys.txt` | ein live-nachgewiesener Schlüssel pro Zeile — von Git ignoriert |
-| `accounts.json` | ein JSON-Datensatz pro Konto (Postfach, Exit, Anmeldequota, Gruppe, Schlüssel, Nachweis) — von Git ignoriert |
-| `proxies.txt` | deine Exits — von Git ignoriert |
-| `out/` | Ausführungsprotokolle — von Git ignoriert |
+| `keys.txt` | ein live-bewiesener Schlüssel pro Zeile — von git ignoriert |
+| `accounts.json` | ein JSON-Datensatz pro Konto (Postfach, Exit, Anmeldequota, Gruppe, Schlüssel, Nachweis) — von git ignoriert |
+| `proxies.txt` | deine Exits — von git ignoriert |
+| `out/` | Ausführungsprotokolle — von git ignoriert |
 
 ## 🔌 Mit 9Router verbinden
 
@@ -202,13 +200,13 @@ Standardwerte: `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model
 | --- | --- |
 | 🏢 Anbieter | **聚合api服务** — [xeduapi.com](https://xeduapi.com) |
 | 🎁 Was der Anbieter gibt | ein Konto pro Schlüssel — ein $0.20-Anmeldeguthaben auf jedem Konto, chat-verifiziert, keine Karte und kein Captcha |
-| 🔑 Was ein Schlüssel dir bringt | einen API-Schlüssel, der auf sein eigenes Konto beschränkt ist: die 10 Modell-IDs am unten stehenden Endpunkt, zu den Limits deines Tarifs. Das Kontingent liegt auf dem **Konto**, weshalb dieses Tool genau ein Konto pro Schlüssel erstellt |
+| 🔑 Was ein Schlüssel dir bringt | einen API-Schlüssel, der auf sein eigenes Konto beschränkt ist: die 10 Modell-IDs am untenstehenden Endpunkt, zu den Limits deines Tarifs. Das Kontingent liegt auf dem **Konto**, genau deshalb erstellt dieses Tool ein Konto pro Schlüssel |
 | 🌐 API-Form | OpenAI-kompatibel: `POST https://xeduapi.com/v1/chat/completions` |
 | 🔒 Deine Daten | nur xeduapi.com und das von dir konfigurierte Inbox-Backend werden kontaktiert; Schlüssel bleiben auf deiner Maschine |
 
 ## 🐞 Probleme
 
-Wenn 聚合api服务 seine Adressrichtlinie, seine Registrierungsform, die Token-Gruppe oder den Katalog ändert, stoppt das Tool an diesem Schritt und sagt es. **[Eröffne ein Issue](../../issues)** mit dem Befehl und der exakten Ausgabe.
+Wenn 聚合api服务 seine Adressrichtlinie, seine Registrierungsform, die Token-Gruppe oder den Katalog ändert, stoppt das Tool an diesem Schritt und sagt es. **[Öffne ein Issue](../../issues)** mit dem Befehl und der exakten Ausgabe.
 
 ## 📄 Lizenz
 
@@ -222,4 +220,4 @@ MIT © 2026 — siehe [LICENSE](LICENSE).
 
 ---
 
-## ⚠️ Konto-Risiko und Minimierung
+## ⚠️ Kontorisiko & wie man es minimiert

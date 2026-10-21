@@ -53,7 +53,6 @@ Because there is no daily refresh, the unit that scales is **accounts**: N accou
 > 💡 The free tier is set by 聚合api服务 and can change. Check the live numbers at [xeduapi.com](https://xeduapi.com) — and let the tool's own gate decide:
 
 ```bash
-```bash
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 
@@ -63,8 +62,7 @@ curl https://xeduapi.com/v1/chat/completions \
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"gday"}],"max_tokens":64}'
 ```
 
-The gate counts `content || reasoning_content`. Prefer a chat-channel id for the check: `deepseek-chat` and `deepseek-v3` are the two proved here.
-```
+The gate counts `content || reasoning_content` and walks a short candidate list over rolling exits: `deepseek-chat`, `deepseek-v3` and `z-ai/glm-5.3` are what the 12-key run proved (codex-channel ids answer 500 and are skipped).
 
 ## 🤖 Models — all 10 of them
 
@@ -123,7 +121,7 @@ Every check below ran on **2026-10-21** from this package's own CLI (`src/cli.js
 | free tier | `GET /api/user/self` → **`quota = 100000` = $0.20** on a fresh account; `POST /api/user/checkin` → `Check-in feature is not enabled` |
 | key route | the list shows it masked; `POST /api/token/<id>/key` returns the 48-char plaintext (group `default`) |
 | `GET /v1/models` per key | **200**, 10 ids |
-| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`) — **2/2 keys LIVE** |
+| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **12/12 keys LIVE**; bulk mint 2026-10-21: **2 → 12 keys**, the gate walks a candidate list over rolling exits |
 | codex channel | `gpt-5.6-terra` → **500** on chat completions, verbatim: needs **OpenAI Responses (/responses)** instead |
 | end-to-end speed | **~45–70 s per key** (mail → register → key → proof) |
 
