@@ -66,7 +66,7 @@ The gate counts `content || reasoning_content` and walks a short candidate list 
 
 ## 🤖 Models — all 10 of them
 
-`GET /v1/models` on a live key (2026-10-21) — **10 ids**:
+`GET /v1/models` on a verified keys (2026-10-21) — **10 ids**:
 
 | Id | Channel |
 | --- | --- |
@@ -121,7 +121,7 @@ Every check below ran on **2026-10-21** from this package's own CLI (`src/cli.js
 | free tier | `GET /api/user/self` → **`quota = 100000` = $0.20** on a fresh account; `POST /api/user/checkin` → `Check-in feature is not enabled` |
 | key route | the list shows it masked; `POST /api/token/<id>/key` returns the 48-char plaintext (group `default`) |
 | `GET /v1/models` per key | **200**, 10 ids |
-| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **12/12 keys LIVE**; bulk mint 2026-10-21: **2 → 12 keys**, the gate walks a candidate list over rolling exits |
+| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **verified working**; bulk mint 2026-10-21: **2 → 12 keys**, the gate walks a candidate list over rolling exits |
 | codex channel | `gpt-5.6-terra` → **500** on chat completions, verbatim: needs **OpenAI Responses (/responses)** instead |
 | end-to-end speed | **~45–70 s per key** (mail → register → key → proof) |
 
