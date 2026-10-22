@@ -53,6 +53,7 @@
 > 💡 無料枠は 聚合apiサービス が設定するもので、変更される可能性があります。最新の数値は [xeduapi.com](https://xeduapi.com) で確認してください — そしてツール自身のゲートに判断させましょう:
 
 ```bash
+
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 

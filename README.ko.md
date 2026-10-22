@@ -53,6 +53,7 @@
 > 💡 무료 티어는 聚合api服务가 정하며 변경될 수 있습니다. 실시간 수치는 [xeduapi.com](https://xeduapi.com)에서 확인하세요 — 그리고 도구 자체의 게이트가 판단하게 하세요:
 
 ```bash
+
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 

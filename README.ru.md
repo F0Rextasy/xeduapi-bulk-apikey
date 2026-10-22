@@ -53,6 +53,7 @@
 > 💡 Бесплатный тариф устанавливается 聚合api服务 и может измениться. Проверяйте актуальные цифры на [xeduapi.com](https://xeduapi.com) — и пусть шлюз инструмента сам решит:
 
 ```bash
+
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 

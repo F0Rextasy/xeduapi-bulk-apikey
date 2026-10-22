@@ -53,6 +53,7 @@ Da es keine tägliche Erneuerung gibt, ist die Einheit, die skaliert, **Konten**
 > 💡 Die kostenlose Stufe wird von 聚合api服务 festgelegt und kann sich ändern. Prüfe die aktuellen Zahlen auf [xeduapi.com](https://xeduapi.com) — und lass das Gate des Tools selbst entscheiden:
 
 ```bash
+
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 

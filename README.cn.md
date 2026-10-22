@@ -53,6 +53,7 @@
 > 💡 免费额度由聚合api服务设定，可能发生变化。请在 [xeduapi.com](https://xeduapi.com) 查看实时数字 — 并让工具自身的验证门来判断：
 
 ```bash
+
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 
