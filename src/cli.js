@@ -68,6 +68,7 @@ const has = (n) => argv.includes(`--${n}`) || argv.includes(`-${n[0]}`);
 const HELP = `xeduapi-bulk-apikey — mint 聚合api服务 API keys (one account per key, each funded by the $0.20 signup credit)
 
   --count N        accounts to mint (default 1)
+  --auto           non-interactive run (the launcher/menu path; never prompts)
   --pool FILE      exit list, one proxy per line (default proxies.txt if present; without one the tool runs direct)
   --proxy URL      pin a single exit for the panel calls
   --exits K        exit candidates tried per account (default 6)
@@ -262,10 +263,13 @@ function pickModels(ids) {
   const usable = list.filter((m) => m.id && !DEFAULT_MODEL_SKIP.test(String(m.id)));
   const priced = usable.map((m) => ({ id: m.id, p: (m.pricing || {}).input_per_mtok_usd })).filter((m) => Number.isFinite(m.p)).sort((a, b) => a.p - b.p).map((m) => m.id);
   const out = [];
-  for (const id of priced) if (!out.includes(id)) out.push(id);
+  // Known-good chat ids first: the panel prices some flash ids cheapest but those
+  // answer 503 "No available channel" or hang (measured 2026-10-23) — a key then
+  // looks dead for a model-choice reason, not a key reason.
   for (const re of DEFAULT_MODEL_PREFS) {
     for (const m of usable) if (re.test(String(m.id)) && !out.includes(m.id)) out.push(m.id);
   }
+  for (const id of priced) if (!out.includes(id)) out.push(id);
   for (const m of usable) if (!out.includes(m.id)) out.push(m.id);
   return out.slice(0, 4);
 }
@@ -383,7 +387,7 @@ async function mintOne(n) {
     rec.verdict = rec.proof.live ? 'minted' : 'key-unverified';
     log(`  proof: models=${rec.proof.models.status}(${rec.proof.models.count}) chat[${rec.proof.chat.model}]=${rec.proof.chat.status} sanity=${rec.proof.sanity ? (rec.proof.sanity.different ? 'farklı' : 'aynı/boş') : '-'} tools=${rec.proof.tools ? (rec.proof.tools.present ? rec.proof.tools.names.join('+') : 'yok') : '-'} ${rec.proof.live ? '✔ LIVE' : '✖'}`);
     if (rec.proof.live) appendKey(key);
-    else appendDead(key, deadClass(rec.proof));
+    else if (/^(401|403|quota|ban)$/.test(deadClass(rec.proof))) appendDead(key, deadClass(rec.proof));   // 429/5xx/transport = key death DEGIL
   } else {
     rec.verdict = 'no-key';
   }
