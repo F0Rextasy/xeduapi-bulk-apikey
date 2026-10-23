@@ -31,8 +31,6 @@ require('dns').setDefaultResultOrder('ipv4first');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const net = require('net');
-const https = require('https');
 const crypto = require('crypto');
 const { spawnSync } = require('child_process');
 
@@ -51,6 +49,11 @@ const SENDER = /@xedu\.[a-z]{2,}$/i;                 // mail comes from the pane
 // Responses API, so the chat gate must not pick those ids
 const DEFAULT_MODEL_SKIP = /terra|codex|gpt-5\.6/i;
 const PROMPT = 'Reply with the single word: pong';
+// Two-prompt sanity + a function-calling round: a key reaches keys.txt only when
+// the panel answers 200, the second answer differs from the first, and the model
+// emits the `get_time` tool call (mirrors the fleet's pre-add gate).
+const PROMPT2 = 'Name three colours, comma separated.';
+const TOOLS = [{ type: 'function', function: { name: 'get_time', description: 'Returns the current time', parameters: { type: 'object', properties: {} } } }];
 const DEFAULT_MODEL_PREFS = [/^deepseek-chat$/i, /^deepseek-v3$/i, /deepseek/i, /flash|mini|nano|turbo|free/i];
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36';
 
@@ -118,7 +121,7 @@ function curl(url, { method = 'GET', headers = {}, body = null, exit = null, jar
   for (const [k, v] of Object.entries(headers)) a.push('-H', `${k}: ${v}`);
   if (body !== null) a.push('-X', method, '-H', 'content-type: application/json', '--data-binary', JSON.stringify(body));
   a.push('-w', '\n__HTTP__%{http_code}', url);
-  const r = spawnSync('curl', a, { encoding: 'utf8', timeout: timeoutMs + 12000 });
+  const r = spawnSync('curl', a, { encoding: 'utf8', timeout: timeoutMs + 12000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
   const raw = r.stdout || '';
   const i = raw.lastIndexOf('__HTTP__');
   const status = i >= 0 ? parseInt(raw.slice(i + 8).trim(), 10) || 0 : 0;
@@ -130,28 +133,15 @@ function curl(url, { method = 'GET', headers = {}, body = null, exit = null, jar
 const msg = (r) => (r.json && (r.json.message || r.json.error)) || String(r.text || '').slice(0, 160);
 
 // ---------------------------------------------------------------------- mail
-/** Emailnator over plain https: dot-free gmail, read directly (no proxy). */
+/**
+ * Emailnator over curl: this box cannot reach emailnator directly (measured
+ * 2026-10-23 — every direct call times out), so the rail rides the same exit
+ * pool as the panel calls. Dot-free plain gmail only; the panel refuses dots.
+ */
 function json_https(url, { method = 'GET', body = null } = {}) {
-  return new Promise((resolve) => {
-    const u = new URL(url);
-    const payload = body === null ? null : Buffer.from(JSON.stringify(body));
-    const req = https.request({
-      method, host: u.hostname, path: u.pathname + u.search,
-      headers: {
-        'user-agent': UA, accept: 'application/json', origin: EMAILNATOR, referer: `${EMAILNATOR}/`,
-        ...(payload ? { 'content-type': 'application/json', 'content-length': payload.length } : {}),
-      },
-      timeout: 30000,
-    }, (res) => {
-      let s = '';
-      res.setEncoding('utf8');
-      res.on('data', (c) => { s += c; });
-      res.on('end', () => { let j = null; try { j = JSON.parse(s); } catch (e) { /* */ } resolve({ status: res.statusCode, json: j, text: s }); });
-    });
-    req.on('timeout', () => req.destroy(new Error('timeout')));
-    req.on('error', (e) => resolve({ status: 0, json: null, text: String(e.message) }));
-    if (payload) req.write(payload);
-    req.end();
+  return curl(url, {
+    method, body, exit: nextExit(), timeoutMs: 30000,
+    headers: { origin: EMAILNATOR, referer: `${EMAILNATOR}/`, accept: 'application/json' },
   });
 }
 
@@ -205,6 +195,50 @@ function appendAccount(rec) {
   all.push(rec);
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(all, null, 1) + '\n');
 }
+const DAY = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+const MINT_JSONL = path.join(OUT_DIR, `mint-100-${path.basename(ROOT)}-${DAY}.jsonl`);
+const DEAD_FILE = path.join(ROOT, 'keys-dead.txt');
+/** A minted-but-dead key keeps its class (401/403/quota/ban/429 or a gate miss). */
+function deadClass(p) {
+  if (!p) return 'unverified';
+  const s = p.chat && p.chat.status;
+  if (s === 401) return '401';
+  if (s === 403) return '403';
+  if (s === 429) return '429';
+  if (s === 402) return 'quota';
+  if (p.sanity && (!p.sanity.live || !p.sanity.different)) return 'sanity-fail';
+  if (p.tools && !p.tools.present) return 'tools-fail';
+  if (!s) return 'transport';
+  return 'unverified';
+}
+function appendDead(key, cls) {
+  const old = fs.existsSync(DEAD_FILE) ? fs.readFileSync(DEAD_FILE, 'utf8') : '';
+  if (old.includes(key)) return;
+  fs.appendFileSync(DEAD_FILE, (old && !old.endsWith('\n') ? '\n' : '') + `${key}\t# ${cls}` + '\n');
+}
+/** One evidence row per account, whatever the outcome. */
+function rowOf(rec) {
+  const key = rec.apiKey;
+  const p = rec.proof;
+  return {
+    at: rec.at, n: rec.n, email: rec.email, mailbox: rec.mailbox || 'emailnator-gmail', exit: rec.exit,
+    code: rec.steps && rec.steps.mail ? rec.steps.mail.code || null : null,
+    register: rec.steps && rec.steps.register ? rec.steps.register.status : null,
+    self: rec.self || null, checkin: rec.checkin_quota_awarded ?? null,
+    key: key ? key.slice(0, 8) + '…' : null,
+    proof: p ? {
+      models: p.models, chat: { model: p.chat.model, status: p.chat.status, content: String(p.chat.content || '').slice(0, 60) },
+      sanity: p.sanity ? { status: p.sanity.status, different: p.sanity.different, content: String(p.sanity.content || '').slice(0, 60) } : null,
+      tools: p.tools || null, exit: p.exit, live: !!p.live,
+    } : null,
+    verdict: rec.verdict, deadClass: rec.verdict === 'minted' ? null : deadClass(p),
+  };
+}
+function finish(rec) {
+  appendAccount(rec);
+  fs.appendFileSync(MINT_JSONL, JSON.stringify(rowOf(rec)) + '\n');
+  return rec;
+}
 
 // ---------------------------------------------------------------------- proof
 function listModels(key, exit) {
@@ -233,30 +267,39 @@ function pickModels(ids) {
   return out.slice(0, 4);
 }
 
-function chatGate(key, model, exit) {
-  if (!model) return { status: 0, content: null, live: false, text: 'no model id' };
+/** One chat call; returns content, any tool-call names, and the raw status. */
+function chatCall(key, model, exit, body) {
+  if (!model) return { status: 0, content: null, names: [], live: false, text: 'no model id' };
   const r = curl(`${BASE}/v1/chat/completions`, {
     method: 'POST', exit, headers: { authorization: `Bearer ${key}` },
-    body: { model, messages: [{ role: 'user', content: PROMPT }], max_tokens: 64, stream: false },
+    body: { model, max_tokens: 256, stream: false, ...body },
   });
   const m0 = r.json && r.json.choices && r.json.choices[0] && r.json.choices[0].message;
-  const content = m0 && (m0.content || m0.reasoning_content);
-  return { status: r.status, content: content || null, live: r.status === 200 && !!content, text: String(r.text || '').slice(0, 200) };
+  const content = (m0 && (m0.content || m0.reasoning_content || m0.reasoning)) || null;
+  const names = ((m0 && m0.tool_calls) || []).map((x) => x && x.function && x.function.name).filter(Boolean);
+  return { status: r.status, content, names, live: r.status === 200 && !!content, text: String(r.text || '').slice(0, 200) };
 }
+const chatGate = (key, model, exit) => chatCall(key, model, exit, { messages: [{ role: 'user', content: PROMPT }], max_tokens: 64 });
 
 function prove(key) {
-  const attempts = Math.max(exits.length, 3);
+  // 6 exits is plenty to prove a key; the whole pool (60+) made a dead key burn
+  // every exit at ~10 s per models call.
+  const attempts = Math.min(Math.max(exits.length, 3), 6);
   let last = null;
   for (let i = 0; i < attempts; i++) {
     const exit = nextExit();
     const models = listModels(key, exit);
     if (models.status !== 200) { last = { models: { status: models.status, count: 0 }, chat: { model: null, status: 0, content: null, live: false, text: 'models unreachable' }, exit, live: false }; continue; }
     for (const model of pickModels(models.ids)) {
-      const chat = chatGate(key, model, exit);
-      const res = { models: { status: models.status, count: models.ids.length }, chat: { model, ...chat }, exit, live: chat.live };
-      if (chat.live) return res;
-      last = res;
-      if (chat.status === 200) return res;   // served but no content — do not keep burning exits
+      const p1 = chatGate(key, model, exit);
+      const res = { models: { status: models.status, count: models.ids.length }, chat: { model, ...p1 }, exit, live: false };
+      if (!p1.live) { last = res; if (p1.status === 200) return res; continue; }   // served but no content — do not keep burning exits
+      const s = chatCall(key, model, exit, { messages: [{ role: 'user', content: PROMPT2 }], max_tokens: 64 });
+      res.sanity = { status: s.status, content: s.content, different: !!s.content && String(s.content).trim().toLowerCase() !== String(p1.content).trim().toLowerCase(), live: s.live };
+      const t = chatCall(key, model, exit, { messages: [{ role: 'user', content: 'What time is it right now? Use the get_time tool.' }], tools: TOOLS, tool_choice: 'auto' });
+      res.tools = { status: t.status, present: t.names.length > 0, names: t.names };
+      res.live = res.sanity.live && res.sanity.different && res.tools.present;
+      return res;
     }
   }
   return last || { models: { status: 0, count: 0 }, chat: { model: null, status: 0, content: null, live: false, text: 'relay unreachable' }, exit: null, live: false };
@@ -276,12 +319,12 @@ async function mintOne(n) {
   const send = curl(`${BASE}/api/verification?email=${encodeURIComponent(email)}`, { exit, jar });
   rec.steps.sendCode = { status: send.status, body: msg(send) };
   log(`  send-code → ${send.status} ${msg(send)}`);
-  if (!(send.json && send.json.success)) { rec.verdict = 'send-code-failed'; return rec; }
+  if (!(send.json && send.json.success)) { rec.verdict = 'send-code-failed'; return finish(rec); }
 
   const mail = await waitForCode(email);
   rec.steps.mail = { code: mail.code, subject: mail.subject || null, from: mail.from || null };
   log(`  code ${mail.code || 'NONE'} «${String(mail.subject || '').slice(0, 50)}»`);
-  if (!mail.code) { rec.verdict = 'no-mail'; return rec; }
+  if (!mail.code) { rec.verdict = 'no-mail'; return finish(rec); }
 
   const reg = curl(`${BASE}/api/user/register`, {
     method: 'POST', exit, jar,
@@ -289,7 +332,7 @@ async function mintOne(n) {
   });
   rec.steps.register = { status: reg.status, body: msg(reg) };
   log(`  register → ${reg.status} ${msg(reg)}`);
-  if (!(reg.json && reg.json.success)) { rec.verdict = 'register-failed'; return rec; }
+  if (!(reg.json && reg.json.success)) { rec.verdict = 'register-failed'; return finish(rec); }
 
   let auth = (reg.json.data && reg.json.data.access_token) || null;
   if (!auth) {
@@ -335,13 +378,13 @@ async function mintOne(n) {
   if (key) {
     rec.proof = prove(key);
     rec.verdict = rec.proof.live ? 'minted' : 'key-unverified';
-    log(`  proof: models=${rec.proof.models.status}(${rec.proof.models.count}) chat[${rec.proof.chat.model}]=${rec.proof.chat.status} ${rec.proof.live ? '✔ LIVE' : '✖'}`);
+    log(`  proof: models=${rec.proof.models.status}(${rec.proof.models.count}) chat[${rec.proof.chat.model}]=${rec.proof.chat.status} sanity=${rec.proof.sanity ? (rec.proof.sanity.different ? 'farklı' : 'aynı/boş') : '-'} tools=${rec.proof.tools ? (rec.proof.tools.present ? rec.proof.tools.names.join('+') : 'yok') : '-'} ${rec.proof.live ? '✔ LIVE' : '✖'}`);
     if (rec.proof.live) appendKey(key);
+    else appendDead(key, deadClass(rec.proof));
   } else {
     rec.verdict = 'no-key';
   }
-  appendAccount(rec);
-  return rec;
+  return finish(rec);
 }
 
 // --------------------------------------------------------------------- modes
@@ -387,7 +430,7 @@ function connect9router() {
   if (SCREEN) return screen();
   if (VERIFY_ONLY) return verifyOnly();
   if (CONNECT) return connect9router();
-  log(`xeduapi mint · ${COUNT} account(s) · ${exits.length ? `${exits.length} exits` : 'DIRECT (no proxy)'} · mail emailnator(gmail, direct)`);
+  log(`xeduapi mint · ${COUNT} account(s) · ${exits.length ? `${exits.length} exits` : 'DIRECT (no proxy)'} · mail emailnator(gmail, via exit)`);
   let minted = 0;
   for (let i = 1; i <= COUNT; i++) {
     try {
