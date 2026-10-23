@@ -27,6 +27,9 @@
  *   node src/cli.js --connect-9router         # register the keys with a local 9Router
  */
 
+// Captcha-wall classifier (this panel enforces turnstile_check): names the wall in the
+// account record instead of looping; a rail is used only if the operator wired one.
+const solver = require('./solver.js');
 require('dns').setDefaultResultOrder('ipv4first');
 const fs = require('fs');
 const os = require('os');
@@ -319,7 +322,7 @@ async function mintOne(n) {
   const send = curl(`${BASE}/api/verification?email=${encodeURIComponent(email)}`, { exit, jar });
   rec.steps.sendCode = { status: send.status, body: msg(send) };
   log(`  send-code → ${send.status} ${msg(send)}`);
-  if (!(send.json && send.json.success)) { rec.verdict = 'send-code-failed'; return finish(rec); }
+  if (!(send.json && send.json.success)) { rec.verdict = 'send-code-failed'; rec.captcha = solver.classify(msg(send)); return finish(rec); }
 
   const mail = await waitForCode(email);
   rec.steps.mail = { code: mail.code, subject: mail.subject || null, from: mail.from || null };
