@@ -21,7 +21,7 @@
 [![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-10-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
+[🛠 Quick start](#-quick-start) · [🎁 Free tier](#-free-tier--how-much-you-get) · [🤖 Models](#-models--all-10-of-them) · [🧪 Use the API](#-how-to-use-the-api) · [✅ Verified](#-verified-working--every-key-is-tested) · [🧭 How it works](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Options](#️-cli-options) · [🛰️ Proxies](#️-behind-a-proxy) · [🐞 Issues](#-issues)
 
 </div>
 
@@ -54,6 +54,7 @@ Because there is no daily refresh, the unit that scales is **accounts**: N accou
 > 💡 The free tier is set by 聚合api服务 and can change. Check the live numbers at [xeduapi.com](https://xeduapi.com) — and let the tool's own gate decide:
 
 ```bash
+```bash
 # every key in keys.txt: the model list plus one real completion
 node src/cli.js --verify-only
 
@@ -64,10 +65,11 @@ curl https://xeduapi.com/v1/chat/completions \
 ```
 
 The gate counts `content || reasoning_content` and walks a short candidate list over rolling exits: `deepseek-chat`, `deepseek-v3` and `z-ai/glm-5.3` are what the 12-key run proved (codex-channel ids answer 500 and are skipped).
+```
 
 ## 🤖 Models — all 10 of them
 
-`GET /v1/models` on a verified keys (2026-10-21) — **10 ids**:
+`GET /v1/models` on a live key (2026-10-21) — **10 ids**:
 
 | Id | Channel |
 | --- | --- |
@@ -111,11 +113,6 @@ The launcher asks for the proxy list (optional — without one the CLI runs dire
 
 ## ✅ Verified working — every key is tested
 
-> **Quality gates.** Every key here passed a live `chat-200` before it was written to `keys.txt`
-> (dead keys are never shipped). Router combos follow the same rule at the model level: an entry is
-> added **only if the model answers `chat-200` and can call tools** — a model without tool support,
-> a dead key or a dead provider is dropped instead of added. Works with **9Router and OmniRoute**.
-
 Every check below ran on **2026-10-21** from this package's own CLI (`src/cli.js`), over public exits (no VPN in the loop).
 
 | Check | Result |
@@ -127,9 +124,15 @@ Every check below ran on **2026-10-21** from this package's own CLI (`src/cli.js
 | free tier | `GET /api/user/self` → **`quota = 100000` = $0.20** on a fresh account; `POST /api/user/checkin` → `Check-in feature is not enabled` |
 | key route | the list shows it masked; `POST /api/token/<id>/key` returns the 48-char plaintext (group `default`) |
 | `GET /v1/models` per key | **200**, 10 ids |
-| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **verified working**; bulk mint 2026-10-21: **keys verified**, the gate walks a candidate list over rolling exits |
+| `POST /v1/chat/completions` per key | **200** with content (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **every key verified**; bulk mint 2026-10-21: **keys minted end-to-end**, the gate walks a candidate list over rolling exits |
 | codex channel | `gpt-5.6-terra` → **500** on chat completions, verbatim: needs **OpenAI Responses (/responses)** instead |
 | end-to-end speed | **~45–70 s per key** (mail → register → key → proof) |
+
+> **Quality gates.** Every key here passed a live `chat-200` before it was written to `keys.txt`
+> (dead keys are never shipped). Router combos follow the same rule at the model level: an entry is
+> added **only if the model answers `chat-200` and can call tools** — a model without tool support,
+> a dead key or a dead provider is dropped instead of added. Re-run the verify step any time;
+> failures are reported, never hidden.
 
 ## 🧭 How it works
 
@@ -209,6 +212,7 @@ node src/connect-omniroute.js --base http://localhost:20128 --password 123456
 ```
 
 Defaults: `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model deepseek-chat`. Models are served as `xeduapi/<model id>` and the router balances across the keys of the node.
+
 ## 🔑 What one key gets you
 
 | | |
@@ -232,7 +236,3 @@ MIT © 2026 — see [LICENSE](LICENSE).
 **[MIT](LICENSE)** © 2026 xeduapi-bulk-apikey contributors
 
 </div>
-
----
-
-## ⚠️ Account risk & how to minimise it

@@ -21,7 +21,7 @@
 [![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 Démarrage rapide](#-quick-start) · [🎁 Offre gratuite](#-free-tier--how-much-you-get) · [🤖 Modèles](#-models--all-10-of-them) · [🧪 Utiliser l'API](#-how-to-use-the-api) · [✅ Vérifié](#-verified-working--every-key-is-tested) · [🧭 Comment ça marche](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ Options](#️-cli-options) · [🛰️ Proxys](#️-behind-a-proxy) · [🐞 Problèmes](#-issues)
+[🛠 Démarrage rapide](#-quick-start) · [🎁 Offre gratuite](#-free-tier--how-much-you-get) · [🤖 Modèles](#-models--all-10-of-them) · [🧪 Utiliser l'API](#-how-to-use-the-api) · [✅ Vérifié](#-verified-working--every-key-is-tested) · [🧭 Comment ça marche](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ Options](#️-cli-options) · [🛰️ Proxys](#️-behind-a-proxy) · [🐞 Problèmes](#-issues)
 
 </div>
 
@@ -33,11 +33,11 @@
 
 ---
 
-## ✨ Pourquoi cela existe
+## ✨ Pourquoi cet outil existe
 
-聚合api服务 (xeduapi.com) est un fork de New API (`v1.0.0-rc.45`) avec la porte d'entrée la plus accueillante de la famille : l'inscription est **ouverte**, il n'y a **pas de captcha**, et un nouveau compte est **crédité à sa création** — `quota = 100000` (soit **0,20 $** à raison de 500 000 quota par dollar). Pas de carte, pas de téléphone, pas d'OAuth, pas de rituel quotidien : un e-mail de vérification et un POST de formulaire, et la clé peut être générée et prouvée immédiatement.
+聚合api服务 (xeduapi.com) est un fork de New API (`v1.0.0-rc.45`) avec le portail le plus accueillant de la famille : l'inscription est **ouverte**, il n'y a **pas de captcha**, et un nouveau compte est **crédité à sa création** — `quota = 100000` (soit **0,20 $** à raison de 500 000 quota par dollar). Pas de carte, pas de téléphone, pas d'OAuth, pas de rituel quotidien : un e-mail de vérification et un POST de formulaire, et la clé peut être émise et prouvée immédiatement.
 
-Ce que l'outil doit bien gérer, c'est la politique d'adresse et la répartition des canaux. La liste blanche d'e-mails accepte **gmail.com** et **qq.com** mais refuse `outlook.com`, et — comme ses panneaux frères — elle traite un **point ou un `+`** dans la partie locale comme un « caractère spécial », donc les alias avec plus/point sont morts ici et la voie qui fonctionne est une boîte **simple** `@gmail.com` lue directement. Côté modèles, le catalogue est mixte : `deepseek-chat`, `deepseek-v3` et compagnie répondent sur `/v1/chat/completions`, tandis que le **canal codex** (`gpt-5.6-terra` et ses frères) refuse ce point de terminaison avec un HTTP 500 et un message vous indiquant d'utiliser l'**API Responses** — la porte ignore ces identifiants pour qu'une clé saine ne soit jamais blâmée pour une incompatibilité de canal.
+Ce que l'outil doit bien gérer, c'est la politique d'adresses et la répartition des canaux. La liste blanche des e-mails accepte **gmail.com** et **qq.com** mais refuse `outlook.com`, et — comme ses panneaux frères — elle traite un **point ou un `+`** dans la partie locale comme un « caractère spécial », donc les alias avec plus/point sont morts ici et la voie qui fonctionne est une boîte **simple** `@gmail.com` lue directement. Côté modèles, le catalogue est mixte : `deepseek-chat`, `deepseek-v3` et leurs semblables répondent sur `/v1/chat/completions`, tandis que le **canal codex** (`gpt-5.6-terra` et ses semblables) refuse ce point de terminaison avec un HTTP 500 et un message vous indiquant d'utiliser l'**API Responses** — le portail ignore ces identifiants pour qu'une clé saine ne soit jamais blâmée pour une incompatibilité de canal.
 
 ## 🎁 Offre gratuite — ce que vous obtenez
 
@@ -46,13 +46,14 @@ Ce que l'outil doit bien gérer, c'est la politique d'adresse et la répartition
 | Crédit d'inscription | **0,20 $** — `GET /api/user/self` juste après l'inscription renvoie `quota = 100000` (500 000 quota = 1 $) |
 | Check-in quotidien | **non disponible** — `POST /api/user/checkin` répond `Check-in feature is not enabled` |
 | Carte / téléphone / OAuth | **aucun requis** — code par e-mail uniquement, `turnstile_check: false` |
-| Ce que cela achète | 10 modèles parmi DeepSeek / StepFun / Z.ai / xAI, aux tarifs publiés du panneau ; aucune ligne strictement à 0 $ n'existe |
+| Ce que ça achète | 10 modèles parmi DeepSeek / StepFun / Z.ai / xAI, aux tarifs publiés du panneau ; aucune ligne à strictement 0 $ n'existe |
 | Clé par compte | une clé par compte est la forme naturelle — le crédit vit sur le compte |
 
 Comme il n'y a pas de renouvellement quotidien, l'unité qui s'échelonne est le **compte** : N comptes ⇒ N × 0,20 $ de crédit.
 
-> 💡 L'offre gratuite est définie par 聚合api服务 et peut changer. Vérifiez les chiffres en direct sur [xeduapi.com](https://xeduapi.com) — et laissez la porte de l'outil décider :
+> 💡 L'offre gratuite est définie par 聚合api服务 et peut changer. Vérifiez les chiffres en direct sur [xeduapi.com](https://xeduapi.com) — et laissez le portail de l'outil décider :
 
+```bash
 ```bash
 
 # every key in keys.txt: the model list plus one real completion
@@ -64,7 +65,8 @@ curl https://xeduapi.com/v1/chat/completions \
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"gday"}],"max_tokens":64}'
 ```
 
-La porte compte `content || reasoning_content` et parcourt une courte liste de candidats sur des sorties tournantes : `deepseek-chat`, `deepseek-v3` et `z-ai/glm-5.3` sont ce que l'exécution à 12 clés a prouvé (les identifiants du canal codex répondent 500 et sont ignorés).
+The gate counts `content || reasoning_content` and walks a short candidate list over rolling exits: `deepseek-chat`, `deepseek-v3` and `z-ai/glm-5.3` are what the 12-key run proved (codex-channel ids answer 500 and are skipped).
+```
 
 ## 🤖 Modèles — les 10 au complet
 
@@ -72,11 +74,11 @@ La porte compte `content || reasoning_content` et parcourt une courte liste de c
 
 | Id | Canal |
 | --- | --- |
-| `deepseek-chat` · `deepseek-v3` · `deepseek-ai/deepseek-v4.1-flash` | **chat completions** — prouvés comme répondant |
+| `deepseek-chat` · `deepseek-v3` · `deepseek-ai/deepseek-v4.1-flash` | **chat completions** — réponse prouvée |
 | `stepfun-ai/step-5-preview` · `z-ai/glm-5.3` · `z-ai/glm-5.3-flash` · `grok-4.5` · `grok-4.6` · `grok-4.7` | chat completions (non testés individuellement ici) |
 | `gpt-5.6-terra` | **API Responses uniquement** — `/v1/chat/completions` répond **500** avec *«当前codex渠道模型(gpt-5.6-terra等)支持的格式：OpenAI Responses (/responses)，不支持的格式：OpenAI (/v1/chat/completions)»* |
 
-Ainsi, un identifiant du canal chat est le bon modèle pour un contrôle de santé. `/api/pricing` liste 5 lignes, groupe `default` uniquement, **aucune ligne strictement à 0 $** — l'offre gratuite est le crédit d'inscription, pas un modèle gratuit.
+Donc un identifiant de canal chat est le bon modèle pour un contrôle de santé. `/api/pricing` liste 5 lignes, groupe `default` uniquement, **aucune ligne à strictement 0 $** — l'offre gratuite est le crédit d'inscription, pas un modèle gratuit.
 
 ## 🧪 Comment utiliser l'API
 
@@ -108,7 +110,7 @@ L'outil crée une boîte gmail simple, demande le code, l'attend, s'inscrit avec
 
 ### 🖱️ Le lanceur
 
-Le lanceur demande la liste de proxys (facultative — sans elle, le CLI s'exécute en direct) et le nombre de comptes, mémorise les deux et lance le CLI — plus `--verify-only`, `--screen` et le connecteur 9Router.
+Le lanceur demande la liste de proxys (facultative — sans elle, le CLI s'exécute en direct) et le nombre de comptes, mémorise les deux et exécute le CLI — plus `--verify-only`, `--screen` et le connecteur 9Router.
 
 ## ✅ Vérifié fonctionnel — chaque clé est testée
 
@@ -117,15 +119,21 @@ Chaque vérification ci-dessous a été exécutée le **2026-10-21** depuis le C
 | Vérification | Résultat |
 | --- | --- |
 | inscription | **aucun navigateur nécessaire** — `turnstile_check: false` |
-| liste blanche d'e-mails | **gmail.com ✓** · qq.com ✓ · `outlook.com` ✗ ; un point ou un `+` dans la partie locale est refusé comme « caractère spécial » |
+| liste blanche e-mail | **gmail.com ✓** · qq.com ✓ · `outlook.com` ✗ ; un point ou un `+` dans la partie locale est refusé comme « caractère spécial » |
 | e-mail de code | «聚合api服务 email verification» depuis le relais du panneau lui-même, **1–2 s**, code de 6 caractères, valide **10 minutes** |
 | inscription | **200 `{"success":true}`** avec le même pot à cookies + un code frais + un mot de passe de ≥8 caractères |
 | offre gratuite | `GET /api/user/self` → **`quota = 100000` = 0,20 $** sur un nouveau compte ; `POST /api/user/checkin` → `Check-in feature is not enabled` |
 | route de clé | la liste l'affiche masquée ; `POST /api/token/<id>/key` renvoie le texte en clair de 48 caractères (groupe `default`) |
 | `GET /v1/models` par clé | **200**, 10 identifiants |
-| `POST /v1/chat/completions` par clé | **200** avec contenu (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **12/12 clés LIVE** ; génération en masse 2026-10-21 : **2 → 12 clés**, la porte parcourt une liste de candidats sur des sorties tournantes |
+| `POST /v1/chat/completions` par clé | **200** avec contenu (`deepseek-chat`, `deepseek-v3`, `z-ai/glm-5.3`) — **chaque clé vérifiée** ; émission en masse 2026-10-21 : **clés émises de bout en bout**, le portail parcourt une liste de candidats sur des sorties rotatives |
 | canal codex | `gpt-5.6-terra` → **500** sur chat completions, verbatim : nécessite **OpenAI Responses (/responses)** à la place |
-| vitesse de bout en bout | **~45–70 s par clé** (mail → inscription → clé → preuve) |
+| vitesse de bout en bout | **~45–70 s par clé** (e-mail → inscription → clé → preuve) |
+
+> **Contrôles qualité.** Chaque clé ici a passé un `chat-200` en direct avant d'être écrite dans `keys.txt`
+> (les clés mortes ne sont jamais livrées). Les combinaisons de routeur suivent la même règle au niveau du modèle : une entrée n'est
+> ajoutée **que si le modèle répond `chat-200` et peut appeler des outils** — un modèle sans prise en charge des outils,
+> une clé morte ou un fournisseur mort est écarté plutôt qu'ajouté. Relancez l'étape de vérification à tout moment ;
+> les échecs sont signalés, jamais cachés.
 
 ## 🧭 Comment ça marche
 
@@ -162,12 +170,12 @@ node src/cli.js --connect-9router --base http://localhost:20128 --password 12345
 
 | Option | Défaut | Signification |
 | --- | --- | --- |
-| `--count N` | `1` | comptes à générer |
+| `--count N` | `1` | comptes à créer |
 | `--pool FILE` | `proxies.txt` si présent | sorties, une par ligne (`http://`, `socks5://`, `socks4://`) |
 | `--proxy URL` | — | épingler une seule sortie |
 | `--exits K` | `6` | sorties candidates essayées par compte |
-| `--model ID` | identifiant du canal chat le moins cher | modèle utilisé pour la porte en direct |
-| `--verify-only` | désactivé | re-prouver `keys.txt` |
+| `--model ID` | identifiant de canal chat le moins cher | modèle utilisé pour le portail en direct |
+| `--verify-only` | désactivé | revérifier `keys.txt` |
 | `--screen` | désactivé | vérifier la liste des sorties contre le panneau |
 | `--connect-9router` | désactivé | exécuter le connecteur 9Router à côté de ce CLI |
 
@@ -175,7 +183,7 @@ node src/cli.js --connect-9router --base http://localhost:20128 --password 12345
 
 **Facultatif.** Sans pool, l'outil affiche `DIRECT (no proxy)` et parle au panneau directement depuis cette machine ; avec un pool, chaque requête au panneau est épinglée à une sortie et une sortie morte ne coûte que sa propre tentative.
 
-La boîte mail est lue **directement** à dessein — la porte mail est séparée de l'hôte API, et faire passer Emailnator par une sortie interceptant TLS répond `unable to get local issuer certificate`. Le lecteur force IPv4 car cette version résout d'abord en IPv6 sans route.
+La boîte mail est lue **directement** à dessein — le portail mail est séparé de l'hôte API, et faire passer Emailnator par une sortie qui intercepte le TLS répond `unable to get local issuer certificate`. Le lecteur force l'IPv4 car cette version résout d'abord en IPv6 sans route.
 
 ## 📄 Fichiers
 
@@ -186,7 +194,7 @@ La boîte mail est lue **directement** à dessein — la porte mail est séparé
 | `proxies.txt` | vos sorties — ignoré par git |
 | `out/` | journaux d'exécution — ignoré par git |
 
-## 🔌 Se connecter à 9Router
+## 🔌 Connexion à 9Router
 
 [9Router](https://9router.com) est un routeur auto-hébergé, compatible OpenAI :
 
@@ -194,9 +202,9 @@ La boîte mail est lue **directement** à dessein — la porte mail est séparé
 node src/connect-9router.js --base http://localhost:20128 --password 123456
 ```
 
-Valeurs par défaut : `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model deepseek-chat`. Les modèles sont servis sous `xeduapi/<model id>` et le routeur équilibre la charge entre les clés du nœud.
+Défauts : `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model deepseek-chat`. Les modèles sont servis sous `xeduapi/<model id>` et le routeur équilibre la charge entre les clés du nœud.
 
-## 🔌 Se connecter à OmniRoute
+## 🔌 Connexion à OmniRoute
 
 [OmniRoute](https://omniroute.online) est un routeur auto-hébergé, compatible OpenAI :
 
@@ -204,20 +212,21 @@ Valeurs par défaut : `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `
 node src/connect-omniroute.js --base http://localhost:20128 --password 123456
 ```
 
-Valeurs par défaut : `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model deepseek-chat`. Les modèles sont servis sous `xeduapi/<model id>` et le routeur équilibre la charge entre les clés du nœud.
-## 🔑 Ce qu'une clé vous apporte
+Défauts : `--prefix xeduapi`, `--base-url https://xeduapi.com/v1`, `--model deepseek-chat`. Les modèles sont servis sous `xeduapi/<model id>` et le routeur équilibre la charge entre les clés du nœud.
+
+## 🔑 Ce qu'une clé vous donne
 
 | | |
 | --- | --- |
 | 🏢 Fournisseur | **聚合api服务** — [xeduapi.com](https://xeduapi.com) |
-| 🎁 Ce que le fournisseur donne | un compte par clé — un crédit d'inscription de 0,20 $ sur chaque compte, vérifié par chat, sans carte ni captcha |
-| 🔑 Ce qu'une clé vous apporte | une clé API limitée à son propre compte : les 10 identifiants de modèles sur le point de terminaison ci-dessous, dans les limites de votre forfait. Le quota vit sur le **compte**, ce qui explique précisément pourquoi cet outil crée un compte par clé |
+| 🎁 Ce que le fournisseur donne | un compte par clé — un crédit d'inscription de 0,20 $ sur chaque compte, vérifié en chat, sans carte ni captcha |
+| 🔑 Ce qu'une clé vous donne | une clé API limitée à son propre compte : les 10 identifiants de modèle sur le point de terminaison ci-dessous, aux limites de votre offre. Le quota vit sur le **compte**, ce qui explique précisément pourquoi cet outil crée un compte par clé |
 | 🌐 Forme de l'API | compatible OpenAI : `POST https://xeduapi.com/v1/chat/completions` |
 | 🔒 Vos données | seuls xeduapi.com et le backend de boîte mail que vous configurez sont contactés ; les clés restent sur votre machine |
 
 ## 🐞 Problèmes
 
-Si 聚合api服务 modifie sa politique d'adresse, la forme de son inscription, le groupe de jetons ou le catalogue, l'outil s'arrête à cette étape et le signale. **[Ouvrez un ticket](../../issues)** avec la commande et la sortie exacte.
+Si 聚合api服务 modifie sa politique d'adresses, la forme de son inscription, le groupe de jetons ou le catalogue, l'outil s'arrête à cette étape et le signale. **[Ouvrez un ticket](../../issues)** avec la commande et la sortie exacte.
 
 ## 📄 Licence
 
@@ -228,7 +237,3 @@ MIT © 2026 — voir [LICENSE](LICENSE).
 **[MIT](LICENSE)** © 2026 xeduapi-bulk-apikey contributors
 
 </div>
-
----
-
-## ⚠️ Risque lié au compte et comment le minimiser

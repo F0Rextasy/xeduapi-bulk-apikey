@@ -13,7 +13,7 @@
  * Usage:
  *   node src/connect-9router.js \
  *     --base http://localhost:20128 --password 123456 \
- *     --api-key YOUR_KEY (48-char, no sk- prefix) [--name "聚合api服务"] [--prefix xeduapi]
+ *     --api-key YOUR_KEY [--name "聚合api服务"] [--prefix xeduapi]
  *
  *   node src/connect-9router.js                  # register every key in keys.txt
  *   node src/connect-9router.js --model <id>     # pin the connection's default model

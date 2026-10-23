@@ -21,7 +21,7 @@
 [![OmniRoute](https://img.shields.io/badge/OmniRoute-connector-8B5CF6?style=for-the-badge)](#-connect-to-omniroute)
 [![X](https://img.shields.io/badge/X-%40bigbullapp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/bigbullapp)
 
-[🛠 クイックスタート](#-quick-start) · [🎁 無料枠](#-free-tier--how-much-you-get) · [🤖 モデル](#-models--all-10-of-them) · [🧪 APIの使い方](#-how-to-use-the-api) · [✅ 検証済み](#-verified-working--every-key-is-tested) · [🧭 仕組み](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [⚙️ オプション](#️-cli-options) · [🛰️ プロキシ](#️-behind-a-proxy) · [🐞 問題報告](#-issues)
+[🛠 クイックスタート](#-quick-start) · [🎁 無料枠](#-free-tier--how-much-you-get) · [🤖 モデル](#-models--all-10-of-them) · [🧪 APIの使い方](#-how-to-use-the-api) · [✅ 検証済み](#-verified-working--every-key-is-tested) · [🧭 仕組み](#-how-it-works) · [🔌 9Router](#-connect-to-9router) · [🔌 OmniRoute](#-connect-to-omniroute) · [⚙️ オプション](#️-cli-options) · [🛰️ プロキシ](#️-behind-a-proxy) · [🐞 問題報告](#-issues)
 
 </div>
 
@@ -35,52 +35,54 @@
 
 ## ✨ これが存在する理由
 
-聚合apiサービス (xeduapi.com) は New API のフォーク (`v1.0.0-rc.45`) で、このファミリーの中で最も敷居が低いゲートを持っています。登録は**オープン**で、**キャプチャはなく**、新しいアカウントは**作成時に資金が付与**されます — `quota = 100000`（1ドルあたり500 000クォータなので**$0.20**）。カードも電話もOAuthも毎日の儀式も不要で、確認メール1通とフォームのPOSTだけで、キーはすぐに発行して証明できます。
+聚合apiサービス (xeduapi.com) は New API のフォーク (`v1.0.0-rc.45`) で、このファミリーの中でもっとも親しみやすいゲートを持っています。登録は**オープン**で、**キャプチャはなく**、新しいアカウントは**作成時に資金が付与**されます — `quota = 100000`（1ドルあたり500 000クォータなので**$0.20**）。カードも電話もOAuthも毎日の儀式も不要で、確認メール1通とフォームのPOSTだけで、キーは即座に発行して証明できます。
 
-このツールが正しく処理すべきなのは、アドレスポリシーとチャネルの分割です。メールのホワイトリストは **gmail.com** と **qq.com** を受け付けますが `outlook.com` は拒否し、同系列のパネルと同様にローカル部分の**ドットや `+`** を「特殊文字」として扱うため、プラス/ドットのエイリアスはここでは使えず、機能する経路は**プレーンな** `@gmail.com` メールボックスを直接読むことです。モデル側ではカタログは混在しています。`deepseek-chat`、`deepseek-v3` などは `/v1/chat/completions` で応答しますが、**codexチャネル**（`gpt-5.6-terra` とその同類）はそのエンドポイントを HTTP 500 で拒否し、**Responses API** を使うよう促すメッセージを返します — ゲートはそれらのIDをスキップするので、健全なキーがチャネルの不一致のせいにされることはありません。
+このツールが正しく処理しなければならないのは、アドレスポリシーとチャネルの分割です。メールのホワイトリストは **gmail.com** と **qq.com** を受け付けますが `outlook.com` は拒否し、同系列のパネルと同様にローカル部分の**ドットや `+`** を「特殊文字」として扱います。つまりプラス/ドットのエイリアスはここでは使えず、機能するレールは**プレーンな** `@gmail.com` メールボックスを直接読むことです。モデル側ではカタログが混在しています。`deepseek-chat`、`deepseek-v3` などは `/v1/chat/completions` で応答しますが、**codexチャネル**（`gpt-5.6-terra` とその同類）はそのエンドポイントをHTTP 500で拒否し、**Responses API** を使うよう促すメッセージを返します — ゲートはそれらのIDをスキップするので、健全なキーがチャネルの不一致のせいにされることはありません。
 
 ## 🎁 無料枠 — どれだけ得られるか
 
 | 項目 | 値 |
 | --- | --- |
-| 登録クレジット | **$0.20** — 登録直後の `GET /api/user/self` は `quota = 100000` を返す（500 000クォータ = $1） |
-| デイリーチェックイン | **利用不可** — `POST /api/user/checkin` は `Check-in feature is not enabled` と応答 |
+| 登録クレジット | **$0.20** — 登録直後の `GET /api/user/self` が `quota = 100000` を返す（500 000クォータ = $1） |
+| 毎日のチェックイン | **利用不可** — `POST /api/user/checkin` は `Check-in feature is not enabled` と応答 |
 | カード / 電話 / OAuth | **一切不要** — メールコードのみ、`turnstile_check: false` |
-| 何が買えるか | DeepSeek / StepFun / Z.ai / xAI にまたがる10モデルを、パネルの公表レートで。strict-$0 の行は存在しない |
-| アカウントあたりのキー | 1アカウント1キーが自然な形 — クレジットはアカウントに紐づく |
+| 何が買えるか | DeepSeek / StepFun / Z.ai / xAI にまたがる10モデル、パネル公表の料金で。厳密な$0の行は存在しない |
+| アカウントあたりのキー | アカウントあたり1キーが自然な形 — クレジットはアカウントに紐づく |
 
-毎日のリフレッシュがないため、スケールする単位は**アカウント**です。Nアカウント ⇒ N × $0.20 のクレジット。
+毎日のリフレッシュがないため、スケールする単位は**アカウント**です。N個のアカウント ⇒ N × $0.20 のクレジット。
 
-> 💡 無料枠は 聚合apiサービス が設定するもので、変更される可能性があります。最新の数値は [xeduapi.com](https://xeduapi.com) で確認してください — そしてツール自身のゲートに判断させましょう:
+> 💡 無料枠は聚合apiサービスによって設定され、変更される可能性があります。最新の数値は [xeduapi.com](https://xeduapi.com) で確認してください — そしてツール自身のゲートに判断させてください:
 
 ```bash
+```bash
 
-# every key in keys.txt: the model list plus one real completion
+# keys.txt のすべてのキー: モデル一覧と実際の補完1回
 node src/cli.js --verify-only
 
-# by hand (keys carry no `sk-` prefix)
+# 手動で（キーには `sk-` プレフィックスがない）
 curl https://xeduapi.com/v1/chat/completions \
   -H "Authorization: Bearer YOUR_KEY" -H "Content-Type: application/json" \
   -d '{"model":"deepseek-chat","messages":[{"role":"user","content":"gday"}],"max_tokens":64}'
 ```
 
-ゲートは `content || reasoning_content` をカウントし、短い候補リストをローリング出口でたどります。12キーの実行で証明されたのは `deepseek-chat`、`deepseek-v3`、`z-ai/glm-5.3` です（codexチャネルのIDは500を返すためスキップされます）。
+ゲートは `content || reasoning_content` をカウントし、ローリング出口をまたいで短い候補リストを辿ります。`deepseek-chat`、`deepseek-v3`、`z-ai/glm-5.3` が12キーの実行で証明されたもので、codexチャネルのIDは500を返すためスキップされます。
+```
 
-## 🤖 モデル — その10個すべて
+## 🤖 モデル — 全10個
 
 稼働中のキーでの `GET /v1/models`（2026-10-21）— **10個のID**:
 
 | ID | チャネル |
 | --- | --- |
 | `deepseek-chat` · `deepseek-v3` · `deepseek-ai/deepseek-v4.1-flash` | **chat completions** — 応答可能と証明済み |
-| `stepfun-ai/step-5-preview` · `z-ai/glm-5.3` · `z-ai/glm-5.3-flash` · `grok-4.5` · `grok-4.6` · `grok-4.7` | chat completions（ここでは個別には検証していない） |
-| `gpt-5.6-terra` | **Responses API のみ** — `/v1/chat/completions` は **500** を返し、*「当前codex渠道模型(gpt-5.6-terra等)支持的格式：OpenAI Responses (/responses)，不支持的格式：OpenAI (/v1/chat/completions)」* |
+| `stepfun-ai/step-5-preview` · `z-ai/glm-5.3` · `z-ai/glm-5.3-flash` · `grok-4.5` · `grok-4.6` · `grok-4.7` | chat completions（ここでは個別に検証していない） |
+| `gpt-5.6-terra` | **Responses APIのみ** — `/v1/chat/completions` は **500** を返し、*「当前codex渠道模型(gpt-5.6-terra等)支持的格式：OpenAI Responses (/responses)，不支持的格式：OpenAI (/v1/chat/completions)」* と表示 |
 
-したがって、ヘルスチェックに正しいモデルはchatチャネルのIDです。`/api/pricing` は5行をリストし、グループは `default` のみ、**strict-$0 の行はなし** — 無料枠は登録クレジットであり、無料モデルではありません。
+したがって、ヘルスチェックにはchatチャネルのIDが正しいモデルです。`/api/pricing` は5行をリストし、グループは `default` のみで、**厳密な$0の行はありません** — 無料枠は登録クレジットであり、無料モデルではありません。
 
 ## 🧪 APIの使い方
 
-ベースURL **`https://xeduapi.com/v1`** — OpenAI互換。キーは48文字で **`sk-` プレフィックスはなく**、`Authorization: Bearer` ヘッダーで渡します。
+ベースURL **`https://xeduapi.com/v1`** — OpenAI互換。キーは48文字で **`sk-` プレフィックスはなく**、`Authorization: Bearer` ヘッダーで送ります。
 
 ```python
 from openai import OpenAI
@@ -89,28 +91,28 @@ print(c.chat.completions.create(model="deepseek-chat",
       messages=[{"role":"user","content":"gday"}]).choices[0].message.content)
 ```
 
-codexチャネルのモデルはResponses APIを必要とします。パネルは素のinputボディでの `/v1/responses` を404で拒否するため、そのチャネルの配線は別の作業です — それ以外はすべてプレーンなOpenAIです。
+codexチャネルのモデルはResponses APIが必要です。パネルは素の入力ボディでの `/v1/responses` を拒否する（404）ため、そのチャネルの接続は別の作業になります — それ以外はすべてプレーンなOpenAIです。
 
-クォータはアカウント単位でそのキー間で共有されるため、**1アカウント = 1キー**が会計をクリーンに保ちます（`usd_exchange_rate: 6.8` は表示レートで、クレジット自体はUSD建てです）。
+クォータはアカウントごとで、そのキーによって共有されるため、**1アカウント = 1キー**が会計をクリーンに保ちます（`usd_exchange_rate: 6.8` は表示レートで、クレジット自体はUSD建てです）。
 
 ## 🛠 クイックスタート
 
 ```bash
 cd xeduapi-bulk-apikey
-printf 'socks5://host:port\n' > proxies.txt   # optional — without it the tool runs direct
-node src/cli.js --screen                     # vet the exits against the panel
-node src/cli.js --count 5                    # five funded keys (no browser needed)
-node src/cli.js --verify-only                # re-prove every key
-node src/cli.js --connect-9router            # register them with a local 9Router
+printf 'socks5://host:port\n' > proxies.txt   # 任意 — なければツールは直接実行
+node src/cli.js --screen                     # パネルに対して出口を審査
+node src/cli.js --count 5                    # 5つの資金付きキー（ブラウザ不要）
+node src/cli.js --verify-only                # すべてのキーを再証明
+node src/cli.js --connect-9router            # ローカルの9Routerに登録
 ```
 
-このツールはプレーンなgmailメールボックスを作成し、コードを要求し、それを待ち、同じCookieジャーで登録し、ログインし、トークンを発行し、キーを表示し、書き留める前に実際の補完でそれを証明します。
+ツールはプレーンなgmailメールボックスを作成し、コードを要求し、それを待ち、同じCookieジャーで登録し、ログインし、トークンを発行し、キーを表示し、書き留める前に実際の補完でそれを証明します。
 
 ### 🖱️ ランチャー
 
-ランチャーはプロキシリスト（任意 — なければCLIは直接実行されます）とアカウント数を尋ね、両方を記憶してCLIを実行します — さらに `--verify-only`、`--screen`、9Routerコネクタも。
+ランチャーはプロキシリスト（任意 — なければCLIは直接実行）とアカウント数を尋ね、両方を記憶してCLIを実行します — さらに `--verify-only`、`--screen`、9Routerコネクタも。
 
-## ✅ 動作検証済み — すべてのキーがテストされる
+## ✅ 検証済みで動作 — すべてのキーがテストされる
 
 以下のすべてのチェックは **2026-10-21** にこのパッケージ自身のCLI（`src/cli.js`）から、公開出口経由で実行されました（VPNは使用していません）。
 
@@ -118,21 +120,27 @@ node src/cli.js --connect-9router            # register them with a local 9Route
 | --- | --- |
 | サインアップ | **ブラウザ不要** — `turnstile_check: false` |
 | メールホワイトリスト | **gmail.com ✓** · qq.com ✓ · `outlook.com` ✗。ローカル部分のドットや `+` は「特殊文字」として拒否される |
-| コードメール | パネル自身のリレーからの «聚合apiサービス email verification»、**1〜2秒**、6文字コード、有効期間 **10分** |
+| コードメール | パネル自身のリレーからの «聚合apiサービス email verification»、**1〜2秒**、6文字コード、有効期間**10分** |
 | 登録 | 同じCookieジャー + 新しいコード + 8文字以上のパスワードで **200 `{"success":true}`** |
 | 無料枠 | 新規アカウントで `GET /api/user/self` → **`quota = 100000` = $0.20**、`POST /api/user/checkin` → `Check-in feature is not enabled` |
-| キー経路 | リストではマスク表示、`POST /api/token/<id>/key` が48文字の平文を返す（グループ `default`） |
+| キールート | 一覧ではマスクされて表示され、`POST /api/token/<id>/key` が48文字の平文を返す（グループ `default`） |
 | キーごとの `GET /v1/models` | **200**、10個のID |
-| キーごとの `POST /v1/chat/completions` | コンテンツ付きで **200**（`deepseek-chat`、`deepseek-v3`、`z-ai/glm-5.3`）— **12/12キーがLIVE**。2026-10-21の一括発行: **2 → 12キー**、ゲートは候補リストをローリング出口でたどる |
-| codexチャネル | `gpt-5.6-terra` → chat completionsで **500**、文言どおり: 代わりに **OpenAI Responses (/responses)** が必要 |
+| キーごとの `POST /v1/chat/completions` | コンテンツ付きで **200**（`deepseek-chat`、`deepseek-v3`、`z-ai/glm-5.3`）— **すべてのキーを検証済み**。一括発行 2026-10-21: **キーはエンドツーエンドで発行**、ゲートはローリング出口をまたいで候補リストを辿る |
+| codexチャネル | `gpt-5.6-terra` → chat completionsで **500**、逐語的に: 代わりに **OpenAI Responses (/responses)** が必要 |
 | エンドツーエンド速度 | **キーあたり約45〜70秒**（メール → 登録 → キー → 証明） |
+
+> **品質ゲート。** ここにあるすべてのキーは、`keys.txt` に書き込まれる前にライブの `chat-200` を通過しています
+> （死んだキーは決して出荷されません）。ルーターのコンボもモデルレベルで同じルールに従います。エントリは
+> **モデルが `chat-200` を返し、ツールを呼び出せる場合にのみ**追加されます — ツールサポートのないモデル、
+> 死んだキー、死んだプロバイダは追加されずに削除されます。検証ステップはいつでも再実行できます。
+> 失敗は報告され、決して隠されません。
 
 ## 🧭 仕組み
 
 ```
 inbox (one address per account)                                  a fresh address per account
    │
-   ├─▶ sign-up: 聚合api服务 page → e-mail address → code / link from the inbox
+   ├─▶ sign-up: 聚合apiサービス page → e-mail address → code / link from the inbox
    ├─▶ session: the account's cookies or access token in hand
    ├─▶ key mint: the account's key endpoint → plaintext key returned once (written to disk immediately)
    └─▶ live proof: POST https://xeduapi.com/v1/chat/completions → real content = the key is live
@@ -141,11 +149,11 @@ inbox (one address per account)                                  a fresh address
 | ステップ | 呼び出し | 備考 |
 | --- | --- | --- |
 | メールボックス | プレーンhttps経由のEmailnator | **プレーンな**gmail。パネルはドットと `+` を拒否する |
-| コード | `GET /api/verification?email=` | `noreply@<panel-mail>` から **1〜2秒**で到着、件名 «聚合apiサービス email verification»、6文字コード、有効期間10分 |
+| コード | `GET /api/verification?email=` | `noreply@<panel-mail>` から**1〜2秒**で到着、件名 «聚合apiサービス email verification»、6文字コード、有効期間10分 |
 | 登録 | `POST /api/user/register` | ボディ `{username,password,password2,email,verification_code,aff_code}`、**同じCookieジャー**、**新しい**コード、パスワード8文字以上 |
 | セッション | `POST /api/user/login` | `data.access_token`（Bearer JWT） |
 | クレジット | `GET /api/user/self` | 新規アカウントで **`quota = 100000` = $0.20** |
-| キー | `POST /api/token/` → `POST /api/token/<id>/key` | グループ `default`（このパネルの実際の名前）。リストはキーをマスク表示し、`/key` が平文を返す |
+| キー | `POST /api/token/` → `POST /api/token/<id>/key` | グループ `default`（このパネルのライブ名）。一覧ではキーはマスクされて表示され、`/key` が平文を返す |
 | 証明 | `GET /v1/models` + `POST /v1/chat/completions` | `content || reasoning_content`。codexチャネルのIDはスキップされる（`/v1/responses` が必要） |
 
 ## ⚙️ CLIオプション
@@ -166,27 +174,27 @@ node src/cli.js --connect-9router --base http://localhost:20128 --password 12345
 | `--pool FILE` | 存在すれば `proxies.txt` | 出口、1行に1つ（`http://`、`socks5://`、`socks4://`） |
 | `--proxy URL` | — | 単一の出口を固定 |
 | `--exits K` | `6` | アカウントごとに試す出口候補 |
-| `--model ID` | 最安のchatチャネルID | ライブゲートに使うモデル |
+| `--model ID` | 最安のchatチャネルID | ライブゲートに使用するモデル |
 | `--verify-only` | オフ | `keys.txt` を再証明 |
-| `--screen` | オフ | 出口リストをパネルに対して検査 |
+| `--screen` | オフ | 出口リストをパネルに対して審査 |
 | `--connect-9router` | オフ | このCLIの隣で9Routerコネクタを実行 |
 
 ## 🛰️ プロキシの背後で
 
 **任意。** プールがなければツールは `DIRECT (no proxy)` と表示し、このマシンから直接パネルと通信します。プールがあれば、すべてのパネルリクエストは出口に固定され、死んだ出口はその試行分のコストしかかかりません。
 
-メールボックスは意図的に**直接**読み取られます — メールゲートはAPIホストとは別であり、TLS傍受する出口経由でEmailnatorをプロキシすると `unable to get local issuer certificate` と応答します。このビルドはルートのないIPv6に先に解決するため、リーダーはIPv4を強制します。
+メールボックスは意図的に**直接**読み取られます — メールゲートはAPIホストとは別であり、TLSを傍受する出口経由でEmailnatorをプロキシすると `unable to get local issuer certificate` と応答します。リーダーはIPv4を強制します。このビルドはルートなしで最初にIPv6に解決するためです。
 
 ## 📄 ファイル
 
 | パス | 内容 |
 | --- | --- |
-| `keys.txt` | ライブ証明済みのキーを1行に1つ — git管理外 |
-| `accounts.json` | アカウントごとに1つのJSONレコード（メールボックス、出口、登録クォータ、グループ、キー、証明）— git管理外 |
-| `proxies.txt` | あなたの出口 — git管理外 |
-| `out/` | 実行ログ — git管理外 |
+| `keys.txt` | ライブ証明済みのキーが1行に1つ — git無視 |
+| `accounts.json` | アカウントごとに1つのJSONレコード（メールボックス、出口、登録クォータ、グループ、キー、証明）— git無視 |
+| `proxies.txt` | あなたの出口 — git無視 |
+| `out/` | 実行ログ — git無視 |
 
-## 🔌 9Routerへの接続
+## 🔌 9Routerに接続
 
 [9Router](https://9router.com) はセルフホストのOpenAI互換ルーターです:
 
@@ -196,7 +204,7 @@ node src/connect-9router.js --base http://localhost:20128 --password 123456
 
 デフォルト: `--prefix xeduapi`、`--base-url https://xeduapi.com/v1`、`--model deepseek-chat`。モデルは `xeduapi/<model id>` として提供され、ルーターはノードのキー間で負荷分散します。
 
-## 🔌 OmniRouteへの接続
+## 🔌 OmniRouteに接続
 
 [OmniRoute](https://omniroute.online) はセルフホストのOpenAI互換ルーターです:
 
@@ -205,19 +213,20 @@ node src/connect-omniroute.js --base http://localhost:20128 --password 123456
 ```
 
 デフォルト: `--prefix xeduapi`、`--base-url https://xeduapi.com/v1`、`--model deepseek-chat`。モデルは `xeduapi/<model id>` として提供され、ルーターはノードのキー間で負荷分散します。
+
 ## 🔑 1つのキーで得られるもの
 
 | | |
 | --- | --- |
-| 🏢 プロバイダー | **聚合apiサービス** — [xeduapi.com](https://xeduapi.com) |
-| 🎁 プロバイダーが提供するもの | キーごとに1アカウント — すべてのアカウントに$0.20の登録クレジット、chat検証済み、カードもキャプチャも不要 |
-| 🔑 1つのキーで得られるもの | 自身のアカウントにスコープされた1つのAPIキー: 下記エンドポイントの10個のモデルIDを、あなたのプランの制限で。クォータは**アカウント**に紐づくため、このツールがキーごとに1アカウントを作成するのです |
+| 🏢 プロバイダ | **聚合apiサービス** — [xeduapi.com](https://xeduapi.com) |
+| 🎁 プロバイダが提供するもの | キーごとに1アカウント — すべてのアカウントに$0.20の登録クレジット、chat検証済み、カードもキャプチャも不要 |
+| 🔑 1つのキーで得られるもの | 自身のアカウントにスコープされた1つのAPIキー: 下記エンドポイントの10個のモデルID、あなたのプランの制限で。クォータは**アカウント**に紐づくため、このツールがキーごとに1アカウントを作成するのです |
 | 🌐 APIの形 | OpenAI互換: `POST https://xeduapi.com/v1/chat/completions` |
-| 🔒 あなたのデータ | 接触するのは xeduapi.com と、あなたが設定した受信箱バックエンドのみ。キーはあなたのマシンに留まります |
+| 🔒 あなたのデータ | 接触するのはxeduapi.comと、あなたが設定した受信トレイバックエンドのみ。キーはあなたのマシンに留まります |
 
 ## 🐞 問題報告
 
-聚合apiサービス がアドレスポリシー、登録の形、トークングループ、またはカタログを変更した場合、ツールはそのステップで停止し、その旨を伝えます。コマンドと正確な出力を添えて **[issueを開いてください](../../issues)**。
+聚合apiサービスがアドレスポリシー、登録の形、トークングループ、カタログを変更した場合、ツールはそのステップで停止し、その旨を伝えます。コマンドと正確な出力を添えて **[issueを開いてください](../../issues)**。
 
 ## 📄 ライセンス
 
@@ -228,7 +237,3 @@ MIT © 2026 — [LICENSE](LICENSE) を参照。
 **[MIT](LICENSE)** © 2026 xeduapi-bulk-apikey contributors
 
 </div>
-
----
-
-## ⚠️ アカウントのリスクとその最小化方法
