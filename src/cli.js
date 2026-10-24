@@ -164,9 +164,25 @@ async function newMailbox() {
 
 const CODE_RE = /(?:verification code is:?|code|verification|验证码)[^0-9a-z]{1,24}(?=[0-9a-z]*\d)([0-9a-z]{4,8})(?![0-9a-z])/i;
 
-async function waitForCode(address, { timeoutMs = CODE_WAIT_MS } = {}) {
+/**
+ * Ids already in the box, taken BEFORE the code is requested: the Emailnator
+ * gmail pool is shared and recycled, so a mail that was already there belongs to
+ * another tenant. A failed snapshot is not an empty box — it retries, then throws.
+ */
+async function snapshotIds(address) {
+  for (let k = 0; k < 4; k++) {
+    try {
+      const list = await json_https(`${EMAILNATOR}/api/message-list`, { method: 'POST', body: { email: address, limit: 20 } });
+      const msgs = list && list.json && list.json.messages;
+      if (Array.isArray(msgs)) return new Set(msgs.map((m) => String((m && m.id) || '')).filter(Boolean));
+    } catch (e) { /* retry */ }
+    await sleep(4000);
+  }
+  throw new Error('inbox snapshot failed (exits unhealthy)');
+}
+async function waitForCode(address, { timeoutMs = CODE_WAIT_MS, seenIds = [] } = {}) {
   const deadline = Date.now() + timeoutMs;
-  const seen = new Set();
+  const seen = new Set(seenIds instanceof Set ? seenIds : (seenIds || []).map(String));
   while (Date.now() < deadline) {
     const list = await json_https(`${EMAILNATOR}/api/message-list`, { method: 'POST', body: { email: address, limit: 20 } });
     for (const m of (list.json && list.json.messages) || []) {
@@ -323,12 +339,13 @@ async function mintOne(n) {
   const rec = { at: new Date().toISOString(), n, email, dotted: box.dotted, username, password, exit: exitLabel(exit), steps: {} };
   log(`#${n} ${email} user=${username} exit=${exitLabel(exit)}`);
 
+  const seenIds = await snapshotIds(email);
   const send = curl(`${BASE}/api/verification?email=${encodeURIComponent(email)}`, { exit, jar });
   rec.steps.sendCode = { status: send.status, body: msg(send) };
   log(`  send-code → ${send.status} ${msg(send)}`);
   if (!(send.json && send.json.success)) { rec.verdict = 'send-code-failed'; rec.captcha = solver.classify(msg(send)); return finish(rec); }
 
-  const mail = await waitForCode(email);
+  const mail = await waitForCode(email, { seenIds });
   rec.steps.mail = { code: mail.code, subject: mail.subject || null, from: mail.from || null };
   log(`  code ${mail.code || 'NONE'} «${String(mail.subject || '').slice(0, 50)}»`);
   if (!mail.code) { rec.verdict = 'no-mail'; return finish(rec); }
